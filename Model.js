@@ -17,6 +17,8 @@ function mixin(dst, src) {
 			dst[name] = s;
 		}
 	}
+
+	return dst;
 }
 
 function getSchemaProperty(object, key) {
@@ -214,7 +216,7 @@ Model.prototype.property = function (/*String...*/ key, nextKey) {
 	if (!property) {
 		property = getSchemaProperty(this, key);
 		// delegate, or just create a new instance if no schema definition exists
-		property = properties[key] = property ? Object.create(property) : new Property();
+		property = properties[key] = property ? delegate(property) : new Property();
 		property.name = key;
 		// give it the correct initial value
 		property._parent = this;
