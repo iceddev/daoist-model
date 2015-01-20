@@ -1,5 +1,7 @@
 var Property = require('./Property');
 
+module.exports = ComputedProperty;
+
 function ComputedProperty() {
 	Property.apply(this, arguments);
 	this.dependsOn = [];

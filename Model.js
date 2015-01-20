@@ -19,7 +19,24 @@ function mixin(dst, src) {
 			dst[name] = s;
 		}
 	}
+
+	return dst;
 }
+
+// TODO: remove?  Object.create doesn't work
+var delegate = (function(){
+	// boodman/crockford delegation w/ cornford optimization
+	function TMP(){}
+	return function(obj, props){
+		TMP.prototype = obj;
+		var tmp = new TMP();
+		TMP.prototype = null;
+		if(props){
+			mixin(tmp, props);
+		}
+		return tmp; // Object
+	};
+})();
 
 function getSchemaProperty(object, key) {
 	// this function will retrieve the individual property definition
@@ -47,7 +64,7 @@ function validate(object, key) {
 		// or, if we don't our own property object, we inherit from the schema
 		property = getSchemaProperty(object, key);
 		if (property && property.validate) {
-			property = Object.create(property, {
+			property = delegate(property, {
 				_parent: object,
 				key: key
 			});
@@ -114,8 +131,8 @@ function whenEach(iterator) {
 }
 
 function Model(options) {
-	this.schema = defaultSchema;
-	this.additionalProperties = true;
+	this.schema = this.schema || defaultSchema;
+	this.additionalProperties = this.additionalProperties != null ? this.additionalProperties : true;
 	this._scenario = 'update';
 
 	this.init(options);
@@ -216,7 +233,7 @@ Model.prototype.property = function (/*String...*/ key, nextKey) {
 	if (!property) {
 		property = getSchemaProperty(this, key);
 		// delegate, or just create a new instance if no schema definition exists
-		property = properties[key] = property ? Object.create(property) : new Property();
+		property = properties[key] = property ? delegate(property) : new Property();
 		property.name = key;
 		// give it the correct initial value
 		property._parent = this;
@@ -246,7 +263,7 @@ Model.prototype.get = function (/*string*/ key) {
 		property = property || (this.hasOwnProperty('_properties') && this._properties[key]);
 		if (!property) {
 			// no property instance, so we create a temporary one
-			property = Object.create(getSchemaProperty(this, key), {
+			property = delegate(getSchemaProperty(this, key), {
 				name: key,
 				_parent: this
 			});
