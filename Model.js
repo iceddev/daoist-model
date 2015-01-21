@@ -8,8 +8,6 @@ Model.Property = Property;
 var emptyObject = {};
 var slice = [].slice;
 
-var defaultSchema = {};
-
 function mixin(dst, src) {
 	var name, s;
 	for(name in src){
@@ -114,12 +112,12 @@ function whenEach(iterator) {
 }
 
 function Model(options) {
-	this.schema = defaultSchema;
-	this.additionalProperties = true;
-	this._scenario = 'update';
-
 	this.init(options);
 }
+
+Model.prototype.schema = {};
+Model.prototype.additionalProperties = true;
+Model.prototype._scenario = 'update';
 
 Model.prototype.init = function(values) {
 	// if we are being constructed, we default to the insert scenario
@@ -418,23 +416,22 @@ var onEnd;
 	onEnd = callback;
 }).atEnd = true;
 
-function Reactive() {
-	Model.apply(this, arguments);
-	//	Indicates whether or not to perform validation when properties
-	//	are modified.
-	//	This can provided immediate feedback and on the success
-	//	or failure of a property modification. And Invalid property
-	//	values will be rejected. However, if you are
-	//	using asynchronous validation, invalid property values will still
-	//	be set.
-	this.validateOnSet = true;
-
-	//	An array of additional validators to apply to this property
-	this.validators = null;
-}
+function Reactive() {}
 
 Reactive.prototype = Object.create(Model.prototype);
 Reactive.prototype.constructor = Reactive;
+
+//	Indicates whether or not to perform validation when properties
+//	are modified.
+//	This can provided immediate feedback and on the success
+//	or failure of a property modification. And Invalid property
+//	values will be rejected. However, if you are
+//	using asynchronous validation, invalid property values will still
+//	be set.
+Reactive.prototype.validateOnSet = true;
+
+//	An array of additional validators to apply to this property
+Reactive.prototype.validators = null;
 
 Reactive.prototype.observe = function (/*function*/ listener, /*object*/ options) {
 	//	summary:
