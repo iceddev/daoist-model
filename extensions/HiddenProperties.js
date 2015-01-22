@@ -1,32 +1,26 @@
-define([
-	'dojo/_base/declare',
-	'dojo/_base/lang',
-	'dojo/json',
-	'../Model'
-], function (declare, lang, JSON, Model) {
-	// summary:
-	//		Extends the Model to keep properties on a '_values' sub-object
-	// 		This can provide the benefits of keeping properties only
-	//		(publicly) accessible through getters and setters and can
-	//		also be faster to instantiate
-	return declare(Model, {
-		_setValues: function (values) {
-			return this._values = values || {};
-		},
+var Model = require('../Model');
 
-		_getValues: function () {
-			return this._values;
-		},
+function HiddenProperties() {
+	Model.apply(this, arguments);
+}
 
-		_restore: function (model) {
-			// we nest our properties
-			var instance = lang.delegate(model.prototype);
-			instance._values = this;
-			return instance;
-		},
+HiddenProperties.prototype = Object.create(Model.prototype);
+HiddenProperties.prototype.constructor = HiddenProperties;
 
-		toJSON: function () {
-			return this._values;
-		}
-	});
-});
+HiddenProperties.prototype._setValues = function(values) {
+	return this._values = values || {};
+};
+
+HiddenProperties.prototype._getValues = function() {
+	return this._values;
+};
+
+HiddenProperties.prototype._restore = function(model) {
+	var instance = Object.create(model.prototype);
+	instance._values = this;
+	return instance;
+};
+
+HiddenProperties.prototype.toJSON = function() {
+	return this._values;
+};
