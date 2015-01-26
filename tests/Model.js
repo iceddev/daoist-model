@@ -25,28 +25,29 @@ var ComputedProperty = require('../ComputedProperty');
 // ], function (registerSuite, assert, JSON, declare, lang, Deferred, Model, Property, ComputedProperty, HiddenProperties, Memory) {
 	function createPopulatedModel() {
 		function TestModel(options){
-			this.schema = {
-				string: 'string',
-				number: 'number',
-				boolean: 'boolean',
-				object: Object,
-				array: Array,
-				any: {},
-				accessor: {
-					put: function (value) {
-						return this._parent._accessor = value;
-					},
-					valueOf: function () {
-						return this._parent._accessor;
-					}
-				}
-			};
-
-			this.additionalProperties = false;
-
 			Model.call(this, options);
 		}
+
 		util.inherits(TestModel, Model);
+
+		TestModel.prototype.schema = {
+			string: 'string',
+			number: 'number',
+			boolean: 'boolean',
+			object: Object,
+			array: Array,
+			any: {},
+			accessor: {
+				put: function (value) {
+					return this._parent._accessor = value;
+				},
+				valueOf: function () {
+					return this._parent._accessor;
+				}
+			}
+		};
+
+		TestModel.prototype.additionalProperties = false;
 
 		var model = new TestModel();
 
@@ -78,6 +79,7 @@ var ComputedProperty = require('../ComputedProperty');
 			assert.strictEqual(model.get('accessor'), 'foo', 'accessors and mutators should work normally');
 
 			model.set('number', 'not-a-number');
+			console.log(model.get('number'), typeof model.get('number'));
 			assert.typeOf(model.get('number'), 'number',
 				'number schema properties should still be numbers even if passed a non-number value');
 			assert.isTrue(isNaN(model.get('number')),
@@ -244,22 +246,24 @@ var ComputedProperty = require('../ComputedProperty');
 
 		lab.test('defaults', function (done) {
 			function TestModel(options){
-				this.schema = {
-					toOverride: {
-						'default': 'beginning value'
-					},
-					hasDefault: {
-						'default': 'beginning value'
-					}
-				};
-
 				Model.call(this, options);
 			}
+
 			util.inherits(TestModel, Model);
+
+			TestModel.prototype.schema = {
+				toOverride: {
+					'default': 'beginning value'
+				},
+				hasDefault: {
+					'default': 'beginning value'
+				}
+			};
 
 			var model = new TestModel({
 				toOverride: 'new value'
 			});
+
 			assert.strictEqual(model.get('toOverride'), 'new value');
 			assert.strictEqual(model.get('hasDefault'), 'beginning value');
 
@@ -268,37 +272,37 @@ var ComputedProperty = require('../ComputedProperty');
 
 		lab.test.skip('computed properties', function (done) {
 			function TestModel(options){
-				this.schema = {
-					firstName: 'string',
-					lastName: 'string',
-					name: new ComputedProperty({
-						dependsOn: ['firstName', 'lastName'],
-						getValue: function (firstName, lastName) {
-							console.log(firstName, lastName);
-							return firstName + ' ' + lastName;
-						},
-						setValue: function (value, parent) {
-							var parts = value.split(' ');
-							parent.set('firstName', parts[0]);
-							parent.set('lastName', parts[1]);
-						}
-					}),
-					birthDate: new ComputedProperty({
-						dependsOn: ['birthDate'],
-						getValue: function (birthDate) {
-							return new Date(birthDate);
-						},
-						setValue: function (value, parent) {
-							return parent[this.name] = value.getTime();
-						}
-					})
-				};
-
-				this.validateOnSet = false;
-
 				Model.call(this, options);
 			}
 			util.inherits(TestModel, Model);
+
+			TestModel.prototype.schema = {
+				firstName: 'string',
+				lastName: 'string',
+				name: new ComputedProperty({
+					dependsOn: ['firstName', 'lastName'],
+					getValue: function (firstName, lastName) {
+						console.log(firstName, lastName);
+						return firstName + ' ' + lastName;
+					},
+					setValue: function (value, parent) {
+						var parts = value.split(' ');
+						parent.set('firstName', parts[0]);
+						parent.set('lastName', parts[1]);
+					}
+				}),
+				birthDate: new ComputedProperty({
+					dependsOn: ['birthDate'],
+					getValue: function (birthDate) {
+						return new Date(birthDate);
+					},
+					setValue: function (value, parent) {
+						return parent[this.name] = value.getTime();
+					}
+				})
+			};
+
+			TestModel.prototype.validateOnSet = false;
 
 			var model = new TestModel({
 				firstName: 'John',
