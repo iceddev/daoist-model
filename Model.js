@@ -46,8 +46,8 @@ function validate(object, key) {
 		property = getSchemaProperty(object, key);
 		if (property && property.validate) {
 			property = Object.create(property, {
-				_parent: object,
-				key: key
+				_parent: { value: object, writable: true, configurable: true, enumerable: true },
+				key: { value: key, writable: true, configurable: true, enumerable: true }
 			});
 		}
 	}
@@ -245,8 +245,8 @@ Model.prototype.get = function (/*string*/ key) {
 		if (!property) {
 			// no property instance, so we create a temporary one
 			property = Object.create(getSchemaProperty(this, key), {
-				name: key,
-				_parent: this
+				name: { value: key, writable: true, configurable: true, enumerable: true },
+				_parent: { value: this, writable: true, configurable: true, enumerable: true }
 			});
 		}
 		// let the property instance handle retrieving the value
