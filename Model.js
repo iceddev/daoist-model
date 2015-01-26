@@ -8,6 +8,30 @@ Model.Property = Property;
 var emptyObject = {};
 var slice = [].slice;
 
+// Extend a Model or Model subtype to create a new Model subtype
+// returns a constructor for the new subtype
+// e.g. var MyModel = Model.extend({ ... });
+function extend(ModelType, prototypeProperties) {
+	function ModelSubtype() {
+		ModelType.apply(this, arguments);
+	}
+
+	ModelSubtype.extend = extendThis;
+
+	ModelSubtype.prototype = Object.create(ModelType.prototype);
+	ModelSubtype.prototype.constructor = ModelSubtype;
+
+	return Object.keys(prototypeProperties).reduce(function(ModelSubtype, k) {
+		ModelSubtype.prototype[k] = prototypeProperties[k];
+		return ModelSubtype;
+	}, ModelSubtype);
+}
+
+// Extend helper that always extends the type referred to by `this`
+function extendThis(prototypeProperties) {
+	return extend(this, prototypeProperties);
+}
+
 function mixin(dst, src) {
 	var name, s;
 	for(name in src){
@@ -116,6 +140,10 @@ function whenEach(iterator) {
 function Model(options) {
 	this.init(options);
 }
+
+// Extend a Model to create a new subtype
+// e.g. var MyModel = Model.extend({ ... });
+Model.extend = extendThis;
 
 Model.prototype.schema = {};
 Model.prototype.additionalProperties = true;

@@ -24,30 +24,26 @@ var ComputedProperty = require('../ComputedProperty');
 // 	'dstore/Memory'
 // ], function (registerSuite, assert, JSON, declare, lang, Deferred, Model, Property, ComputedProperty, HiddenProperties, Memory) {
 	function createPopulatedModel() {
-		function TestModel(options){
-			Model.call(this, options);
-		}
 
-		util.inherits(TestModel, Model);
-
-		TestModel.prototype.schema = {
-			string: 'string',
-			number: 'number',
-			boolean: 'boolean',
-			object: Object,
-			array: Array,
-			any: {},
-			accessor: {
-				put: function (value) {
-					return this._parent._accessor = value;
-				},
-				valueOf: function () {
-					return this._parent._accessor;
+		var TestModel = Model.extend({
+			schema: {
+				string: 'string',
+				number: 'number',
+				boolean: 'boolean',
+				object: Object,
+				array: Array,
+				any: {},
+				accessor: {
+					put: function (value) {
+						return this._parent._accessor = value;
+					},
+					valueOf: function () {
+						return this._parent._accessor;
+					}
 				}
-			}
-		};
-
-		TestModel.prototype.additionalProperties = false;
+			},
+			additionalProperties: false
+		});
 
 		var model = new TestModel();
 
@@ -245,20 +241,16 @@ var ComputedProperty = require('../ComputedProperty');
 		});
 
 		lab.test('defaults', function (done) {
-			function TestModel(options){
-				Model.call(this, options);
-			}
-
-			util.inherits(TestModel, Model);
-
-			TestModel.prototype.schema = {
-				toOverride: {
-					'default': 'beginning value'
-				},
-				hasDefault: {
-					'default': 'beginning value'
+			var TestModel = Model.extend({
+				schema: {
+					toOverride: {
+						'default': 'beginning value'
+					},
+					hasDefault: {
+						'default': 'beginning value'
+					}
 				}
-			};
+			});
 
 			var model = new TestModel({
 				toOverride: 'new value'
